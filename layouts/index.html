@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ .Site.Title }} — pooled, copy-on-write volume management in pure Go</title>
+<meta name="description" content="Pooled, copy-on-write volume management in pure Go — no cgo, no root, no device-mapper. Carve thin, snapshottable volumes out of a shared block pool, then put a filesystem on top. A ZFS-inspired alternative to LVM thin provisioning.">
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1b1f24; --muted: #57606a; --card: #f6f8fa;
+    --border: #d0d7de; --accent: #0079a8; --accent-fg: #ffffff;
+    --storage: #0079a8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --card: #161b22;
+      --border: #30363d; --accent: #22cce2; --accent-fg: #0d1117;
+      --storage: #22cce2;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+  header { padding: 72px 0 32px; text-align: center; }
+  .logo { width: 88px; height: 88px; margin: 0 auto 18px; display: block; }
+  h1 { font-size: 2.6rem; margin: 0 0 .3em; letter-spacing: -.02em; }
+  .tagline { font-size: 1.2rem; color: var(--muted); margin: 0 auto; max-width: 680px; }
+  .pills { margin: 22px 0 0; }
+  .pill {
+    display: inline-block; margin: 4px; padding: 3px 10px; font-size: .82rem;
+    color: var(--muted); background: var(--card); border: 1px solid var(--border); border-radius: 999px;
+  }
+  .cta { margin: 30px 0 0; }
+  .btn {
+    display: inline-block; padding: 10px 18px; margin: 4px; border-radius: 8px; text-decoration: none;
+    font-weight: 600; border: 1px solid var(--border);
+  }
+  .btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+  .btn.ghost { color: var(--fg); background: transparent; }
+  .lead { color: var(--fg); max-width: 800px; margin: 8px auto 0; text-align: center; }
+  .lead code { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1px 6px; }
+  h2.section { text-align: center; margin: 40px 0 4px; font-size: 1.4rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; padding: 16px 0 8px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; display: flex; flex-direction: column; }
+  .card h3 { margin: 0 0 .35em; font-size: 1.2rem; display: flex; align-items: center; justify-content: space-between; }
+  .card h3 a { text-decoration: none; }
+  .card .accel { color: var(--muted); font-size: .85rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; margin: 0 0 .6em; }
+  .card p { margin: 0 0 .8em; color: var(--fg); font-size: .95rem; }
+  .card .badges { margin-top: auto; }
+  .card .badges img { height: 20px; vertical-align: middle; }
+  .kind { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); }
+  .kind.storage { color: var(--storage); }
+  .card h3 .tags { display: inline-flex; gap: 6px; }
+  .type { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); }
+  .type.lib { color: var(--accent); border-color: var(--accent); }
+  .type.cli { color: var(--accent-fg); background: var(--accent); border-color: var(--accent); }
+  .principles { color: var(--muted); text-align: center; padding: 10px 0 0; max-width: 820px; margin: 0 auto; }
+  footer { color: var(--muted); text-align: center; padding: 40px 0 56px; font-size: .9rem; }
+  a { color: var(--accent); }
+</style>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+</head>
+<body>
+  <header class="wrap">
+    <img class="logo" src="/img/logo.svg" alt="go-volumes logo" width="88" height="88">
+    <h1>go-volumes</h1>
+    <p class="tagline">Pooled, copy-on-write <strong>volume management</strong> in pure Go &mdash;
+      carve thin, snapshottable volumes out of a shared block pool, then put a filesystem on top.
+      <strong>No cgo, no root, no device-mapper.</strong></p>
+    <div class="pills">
+      <span class="pill">pure Go</span>
+      <span class="pill">no cgo</span>
+      <span class="pill">no root</span>
+      <span class="pill">copy-on-write snapshots</span>
+      <span class="pill">ZFS-inspired</span>
+      <span class="pill">BSD-3-Clause</span>
+    </div>
+    <div class="cta">
+      <a class="btn primary" href="https://go-volumes.github.io/docs/">Documentation</a>
+      <a class="btn ghost" href="https://github.com/go-volumes">GitHub</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <p class="lead"><code>go-volumes</code> builds a pooled, copy-on-write volume layer in pure Go: a
+      <strong>pool</strong> owns a flat array of fixed-size physical blocks backed by a single file,
+      <strong>volumes</strong> are logical block devices carved out of it, and <strong>snapshots</strong>
+      are immutable, reference-counted captures. Writes are copy-on-write, so overwriting a block shared
+      with a snapshot allocates a fresh one and leaves the snapshot untouched.</p>
+
+    <p class="lead"><strong>A ZFS-inspired alternative to LVM thin provisioning.</strong> LVM thin
+      snapshots can corrupt when the pool fills past a threshold; here a copy-on-write write fails
+      <strong>cleanly and atomically</strong> with <code>ErrPoolFull</code> <em>before</em> any on-disk
+      state changes, so a mounted filesystem sees a normal <code>ENOSPC</code> rather than silent
+      corruption. A <code>Volume</code> implements <code>ReadAt</code>, <code>WriteAt</code>,
+      <code>Sync</code>, <code>Size</code>, <code>Truncate</code> and <code>Close</code> &mdash; the same
+      block-backend shape the
+      <a href="https://github.com/go-filesystems">go-filesystems</a> ext4/xfs drivers accept &mdash; so
+      you can format and mount straight onto a pool volume.</p>
+
+    <h2 class="section">Repositories</h2>
+    <section class="grid">
+      {{ range .Site.Params.repos }}
+      <article class="card">
+        <h3>
+          <a href="https://github.com/go-volumes/{{ .name }}"><code>{{ .name }}</code></a>
+          <span class="tags"><span class="type {{ .type }}">{{ .type }}</span><span class="kind {{ .kind }}">{{ .kind }}</span></span>
+        </h3>
+        <p class="accel">{{ .accel }}</p>
+        <p class="arch" style="font-size:.85rem;font-weight:600;margin:.3rem 0 0;color:var(--accent)">{{ .arch }}</p>
+        <p>{{ .result }}</p>
+      </article>
+      {{ end }}
+    </section>
+    <p class="principles">Pure Go with no cgo, no root, and no device-mapper. Snapshots are immutable and
+      reference-counted; the pool refuses a copy-on-write write atomically when it's full rather than
+      risk corruption. <code>go-volumes</code> pairs with
+      <a href="https://github.com/go-filesystems">go-filesystems</a> for the filesystem on top and
+      <a href="https://github.com/go-fde">go-fde</a> for encryption underneath. BSD-3-Clause throughout.</p>
+  </main>
+
+  <footer class="wrap">
+    BSD-3-Clause · <a href="https://github.com/go-volumes">github.com/go-volumes</a> ·
+    pairs with <a href="https://github.com/go-filesystems">go-filesystems</a>
+  </footer>
+</body>
+</html>

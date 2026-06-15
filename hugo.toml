@@ -1,0 +1,15 @@
+baseURL = "https://go-volumes.github.io/"
+title = "go-volumes"
+disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
+
+[markup.goldmark.renderer]
+  unsafe = true
+
+# Each repo card. "kind" = the layer (storage); "type" = lib vs cli.
+[[params.repos]]
+  name = "pool"
+  accel = "Pooled, copy-on-write volume manager (Volume / Snapshot)"
+  kind = "storage"
+  type = "lib"
+  arch = "pure Go — no cgo, no root, no device-mapper"
+  result = "A small, ZFS-inspired alternative to LVM thin provisioning: a pool owns a flat array of fixed-size blocks in one file, volumes are carved out of it, and snapshots are immutable, reference-counted, copy-on-write captures. When the pool fills, a CoW write fails cleanly and atomically with ErrPoolFull before any on-disk state changes — so snapshots can't be corrupted the way LVM thin snapshots can. A Volume implements ReadAt/WriteAt/Sync/Size/Truncate/Close, the block-backend shape go-filesystems' ext4/xfs drivers accept."
