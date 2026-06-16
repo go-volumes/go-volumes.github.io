@@ -83,8 +83,9 @@
   <header class="wrap">
     <img class="logo" src="/img/logo.svg" alt="go-volumes logo" width="88" height="88">
     <h1>go-volumes</h1>
-    <p class="tagline">Pooled, copy-on-write <strong>volume management</strong> in pure Go &mdash;
-      carve thin, snapshottable volumes out of a shared block pool, then put a filesystem on top.
+    <p class="tagline">Pure-Go <strong>block storage</strong> &mdash; a copy-on-write volume
+      <strong>pool</strong> plus pluggable <strong>backings</strong> (local file, S3, OCI artifact).
+      Carve thin, snapshottable volumes, then put a filesystem on top.
       <strong>No cgo, no root, no device-mapper.</strong></p>
     <div class="pills">
       <span class="pill">pure Go</span>
@@ -92,6 +93,8 @@
       <span class="pill">no root</span>
       <span class="pill">copy-on-write snapshots</span>
       <span class="pill">ZFS-inspired</span>
+      <span class="pill">S3-backed</span>
+      <span class="pill">OCI artifacts</span>
       <span class="pill">BSD-3-Clause</span>
     </div>
     <div class="cta">
@@ -116,6 +119,15 @@
       block-backend shape the
       <a href="https://github.com/go-filesystems">go-filesystems</a> ext4/xfs drivers accept &mdash; so
       you can format and mount straight onto a pool volume.</p>
+
+    <p class="lead"><strong>One contract, swappable backings.</strong> The
+      <a href="https://github.com/go-volumes/interface"><code>Device</code></a> contract
+      (<code>ReadAt</code>/<code>WriteAt</code>/<code>Size</code>/<code>Sync</code>/<code>Close</code>) is all
+      a filesystem driver sees, so <em>where</em> the bytes live is pluggable: a local file, an
+      <a href="https://github.com/go-volumes/s3">S3-compatible bucket</a> (from-scratch AWS Signature V4,
+      standard library only &mdash; no <code>aws-sdk-go</code>), or an immutable, content-addressed
+      <a href="https://github.com/go-volumes/oci">OCI artifact</a> &mdash; chunk-deduped, so a mostly-empty
+      sparse image freezes to a handful of blobs regardless of its logical size.</p>
 
     <h2 class="section">Repositories</h2>
     <section class="grid">

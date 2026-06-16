@@ -5,11 +5,32 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
 [markup.goldmark.renderer]
   unsafe = true
 
-# Each repo card. "kind" = the layer (storage); "type" = lib vs cli.
+# Each repo card. "kind" = the layer (contract / storage / backing); "type" = lib vs cli.
+[[params.repos]]
+  name = "interface"
+  accel = "The block-device Device contract (package volume)"
+  kind = "contract"
+  type = "lib"
+  arch = "stdlib only — io.ReaderAt/WriterAt + Size/Sync/Close"
+  result = "The shared block-device contract every layer reads and writes through: a fixed-size, random-access Device (ReadAt/WriteAt/Size/Sync/Close) plus a ReadOnly subset and optional capabilities (Truncate, Name, ReadOnly, Discard). It decouples WHERE the bytes live from the filesystem FORMAT on top — pool's *Volume satisfies Device verbatim, and a go-filesystems driver writes its on-disk image through it without caring which backing is underneath."
 [[params.repos]]
   name = "pool"
   accel = "Pooled, copy-on-write volume manager (Volume / Snapshot)"
   kind = "storage"
   type = "lib"
   arch = "pure Go — no cgo, no root, no device-mapper"
-  result = "A small, ZFS-inspired alternative to LVM thin provisioning: a pool owns a flat array of fixed-size blocks in one file, volumes are carved out of it, and snapshots are immutable, reference-counted, copy-on-write captures. When the pool fills, a CoW write fails cleanly and atomically with ErrPoolFull before any on-disk state changes — so snapshots can't be corrupted the way LVM thin snapshots can. A Volume implements ReadAt/WriteAt/Sync/Size/Truncate/Close, the block-backend shape go-filesystems' ext4/xfs drivers accept."
+  result = "A small, ZFS-inspired alternative to LVM thin provisioning: a pool owns a flat array of fixed-size blocks in one file, volumes are carved out of it, and snapshots are immutable, reference-counted, copy-on-write captures. When the pool fills, a CoW write fails cleanly and atomically with ErrPoolFull before any on-disk state changes — so snapshots can't be corrupted the way LVM thin snapshots can. A Volume implements ReadAt/WriteAt/Sync/Size/Truncate/Close, the block-backend shape go-filesystems' ext4/xfs drivers accept. Pluggable Backing decides where the bytes live."
+[[params.repos]]
+  name = "s3"
+  accel = "S3-backed block store (pool Backing) — from-scratch SigV4"
+  kind = "backing"
+  type = "lib"
+  arch = "stdlib only — no aws-sdk-go, no minio-go"
+  result = "A pure-Go S3-backed block store satisfying pool's Backing interface: it maps a flat byte address space onto fixed-size chunk objects in any S3-compatible bucket, with an in-memory write-back cache, so a copy-on-write pool — or any block consumer — runs on object storage with no local file. AWS Signature Version 4 is implemented from scratch on crypto/hmac + crypto/sha256 and validated byte-for-byte against the official AWS SigV4 test suite."
+[[params.repos]]
+  name = "oci"
+  accel = "Freeze a volume into an immutable, content-addressed OCI artifact"
+  kind = "backing"
+  type = "lib"
+  arch = "stdlib only — OCI Distribution v2 client over net/http"
+  result = "Freeze a block-volume image into an immutable, content-addressed OCI artifact (push to any registry) and re-open it as a read-only backing (pull on demand, LRU byte cache). Each chunk is sha256-addressed and pushed once, so identical chunks — especially the all-zero holes of a sparse image — collapse to a single blob: a mostly-empty disk freezes to a handful of blobs regardless of logical size. Plugs into pool's OpenWith as a genuinely immutable backing, and rejects every write."
