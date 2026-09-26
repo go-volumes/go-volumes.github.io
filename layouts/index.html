@@ -9,20 +9,20 @@
   :root {
     --bg: #ffffff; --fg: #1b1f24; --muted: #57606a; --card: #f6f8fa;
     --border: #d0d7de; --accent: #0079a8; --accent-fg: #ffffff;
-    --storage: #0079a8;
+    --storage: #0079a8; --contract: #6639ba; --backing: #9a6700; --parsing: #1a7f37;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme]) {
       --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --card: #161b22;
       --border: #30363d; --accent: #22cce2; --accent-fg: #0d1117;
-      --storage: #22cce2;
+      --storage: #22cce2; --contract: #b083f0; --backing: #d29922; --parsing: #3fb950;
     }
   }
   /* Forced dark (manual toggle). */
   :root[data-theme="dark"] {
       --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --card: #161b22;
       --border: #30363d; --accent: #22cce2; --accent-fg: #0d1117;
-      --storage: #22cce2;
+      --storage: #22cce2; --contract: #b083f0; --backing: #d29922; --parsing: #3fb950;
   }
   .theme-toggle {
     position: fixed; top: 14px; right: 14px; z-index: 10;
@@ -64,6 +64,12 @@
   .card .badges img { height: 20px; vertical-align: middle; }
   .kind { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); }
   .kind.storage { color: var(--storage); }
+  /* ⛔ Four of the seven badges had no rule at all: backing (three of them) and
+     contract fell back to the border colour, which reads as "no kind" rather
+     than as a kind. Adding parsing without these would have made it five. */
+  .kind.contract { color: var(--contract); }
+  .kind.backing { color: var(--backing); }
+  .kind.parsing { color: var(--parsing); }
   .card h3 .tags { display: inline-flex; gap: 6px; }
   .type { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); }
   .type.lib { color: var(--accent); border-color: var(--accent); }

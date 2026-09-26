@@ -14,6 +14,20 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
   arch = "stdlib only — io.ReaderAt/WriterAt + Size/Sync/Close"
   result = "The shared block-device contract every layer reads and writes through: a fixed-size, random-access Device (ReadAt/WriteAt/Size/Sync/Close) plus a ReadOnly subset and optional capabilities (Truncate, Name, ReadOnly, Discard). It decouples WHERE the bytes live from the filesystem FORMAT on top — pool's *Volume satisfies Device verbatim, and a go-filesystems driver writes its on-disk image through it without caring which backing is underneath."
 [[params.repos]]
+  name = "safeio"
+  accel = "Bounds, allocation and cycle guards for untrusted bytes"
+  kind = "parsing"
+  type = "lib"
+  arch = "stdlib only — every helper returns an error, none panics"
+  result = "An on-disk image is attacker-controlled input, and the four ways it kills a host are always the same: an unbounded <code>make([]byte, N)</code> that OOMs, a chain or tree walk that never ends, a fixed-offset read with no length check, and geometry that divides by zero. <code>MakeBytes</code>, <code>ReadAtFull</code>, <code>LoopGuard</code>, <code>VisitSet</code>, <code>CheckBounds</code> and <code>Slice</code> make each one a one-liner. Sentinel errors wrap <code>ErrSafeIO</code>, so a caller matches the specific cause or the whole family."
+[[params.repos]]
+  name = "gpt"
+  accel = "GPT / MBR partition tables, hardened against the image"
+  kind = "parsing"
+  type = "lib"
+  arch = "stdlib only — 512-byte logical sectors; 4Kn is out of scope"
+  result = "The single, neutral partition-table reader for the block stack, shared by the go-filesystems drivers in place of the duplicated and individually buggy copies they each used to carry. It parses UNTRUSTED images, so every length, count and offset is validated before use: entry size and count are capped, the entry-array LBA and every partition's start and length are checked against the device size, all offset arithmetic is <code>int64</code> to reject overflow, and a truncated header returns an error instead of panicking. It never auto-follows nonsensical geometry."
+[[params.repos]]
   name = "pool"
   accel = "Pooled, copy-on-write volume manager (Volume / Snapshot)"
   kind = "storage"
