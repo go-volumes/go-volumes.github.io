@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+{{/* Dark Reader repaints pages that already draw their own dark theme, as this one does: ask it to stand aside. */}}
+<meta name="darkreader-lock">
 <title>{{ .Site.Title }} — pooled, copy-on-write volume management in pure Go</title>
 <meta name="description" content="Pooled, copy-on-write volume management in pure Go — no cgo, no root, no device-mapper. Carve thin, snapshottable volumes out of a shared block pool, then put a filesystem on top. A ZFS-inspired alternative to LVM thin provisioning.">
 <style>
