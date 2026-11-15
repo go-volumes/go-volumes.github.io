@@ -45,15 +45,13 @@
   <div class="hero"><div class="wrap">
     <div>
       <h1 class="head">go-volumes</h1>
-      <p class="sub">Pure-Go <strong>block storage</strong> &mdash; a copy-on-write volume
+      <p class="sub">{{ if partial "mantra-on.html" . }}Go{{ else }}Pure-Go{{ end }} <strong>block storage</strong> &mdash; a copy-on-write volume
       <strong>pool</strong> plus pluggable <strong>backings</strong> (local file, S3, OCI artifact).
       Carve thin, snapshottable volumes, then put a filesystem on top.
-      <strong>No cgo, no root, no device-mapper.</strong></p>
-      <div class="cta">
-        <a class="btn btn-primary" href="https://go-volumes.github.io/docs/">{{ partial "icons/book.html" . }}Documentation</a>
-        <a class="btn btn-ghost" href="https://github.com/go-volumes">{{ partial "icons/github.html" . }}GitHub</a>
-      </div>
-      <div class="trust"><span class="pill">pure Go</span>{{ if not (partial "mantra-on.html" $) }}<span class="pill">no cgo</span>{{ end }}<span class="pill">no root</span><span class="pill">copy-on-write snapshots</span><span class="pill">ZFS-inspired</span><span class="pill">S3-backed</span><span class="pill">OCI artifacts</span>{{ if not (partial "mantra-on.html" $) }}<span class="pill">BSD-3-Clause</span>{{ end }}</div>
+      <strong>{{ if not (partial "mantra-on.html" $) }}No cgo{{ end }}, no root, no device-mapper.</strong></p>
+      {{/* [[params.cta]] in hugo.toml: the kit renders the row */}}
+      {{ partial "cta.html" . }}
+      <div class="trust"><span class="pill">pure Go</span>{{ if not (partial "mantra-on.html" $) }}{{ if not (partial "mantra-on.html" $) }}<span class="pill">no cgo</span>{{ end }}{{ end }}<span class="pill">no root</span><span class="pill">copy-on-write snapshots</span><span class="pill">ZFS-inspired</span><span class="pill">S3-backed</span><span class="pill">OCI artifacts</span>{{ if not (partial "mantra-on.html" $) }}{{ if not (partial "mantra-on.html" $) }}<span class="pill">BSD-3-Clause</span>{{ end }}{{ end }}</div>
     </div>
     {{ partial "hero-carousel.html" . }}
   </div></div>
